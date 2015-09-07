@@ -1,0 +1,22 @@
+{
+  "name": "2015-08-chatterbox-server",
+  "version": "0.0.0",
+  "homepage": "https://github.com/tscheys/2015-08-chatterbox-server",
+  "authors": [
+    "tscheys <tim.scheys@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "client/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "backbone": "~1.2.3",
+    "jquery": "~2.1.4",
+    "underscore": "~1.8.3"
+  }
+}

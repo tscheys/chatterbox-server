@@ -21,7 +21,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 var Message = Backbone.Model.extend({
-  url: 'https://api.parse.com/1/classes/chatterbox/',
+  url: '',
   defaults: {
     username: '',
     text: ''
@@ -29,9 +29,9 @@ var Message = Backbone.Model.extend({
 });
 
 var Messages = Backbone.Collection.extend({
-
+  // /classes/chatterbox/
   model: Message,
-  url: 'https://api.parse.com/1/classes/chatterbox/',
+  url: '',
 
   loadMsgs: function() {
     this.fetch({data: { order: '-createdAt' }});
@@ -127,8 +127,8 @@ var MessagesView = Backbone.View.extend({
 /////////////////////////////////////////////////////////////////////////////
 
 app = {
-
-    server: 'https://api.parse.com/1/classes/chatterbox/',
+    // parse.com/1/classes/chatterbox/
+    server: '',
 
     init: function() {
       // Get username
@@ -181,7 +181,7 @@ app = {
 
     loadMsgs: function() {
       $.ajax({
-        url: app.server,
+        url: '',
         data: { order: '-createdAt' },
         contentType: 'application/json',
         success: function(json) {
@@ -197,7 +197,7 @@ app = {
       app.startSpinner();
       $.ajax({
         type: 'POST',
-        url: app.server,
+        url: '',
         data: JSON.stringify(message),
         contentType: 'application/json',
         success: function(json) {
