@@ -1,5 +1,19 @@
 /* Import node's http module: */
 var http = require("http");
+// var nodemon = require("nodemon");
+
+// nodemon({
+//   script: './basic-server.js',
+//   ext: 'js json'
+// });
+
+// nodemon.on('start', function () {
+//   console.log('App has started');
+// }).on('quit', function () {
+//   console.log('App has quit');
+// }).on('restart', function (files) {
+//   console.log('App restarted due to: ', files);
+// });
 
 
 // Every server needs to listen on a port with a unique number. The
@@ -22,9 +36,9 @@ var ip = "127.0.0.1";
 // incoming requests.
 //
 // After creating the server, we will tell it to listen on the given port and IP. */
-
+var handleRequest = require("./request-handler.js");
 // handleRequest?
-var server = http.createServer(handleRequest);
+var server = http.createServer(handleRequest.requestHandler);
 console.log("Listening on http://" + ip + ":" + port);
 server.listen(port, ip);
 

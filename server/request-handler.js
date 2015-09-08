@@ -12,6 +12,9 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 
+var messages = {};
+messages.results = [];
+
 var requestHandler = function(request, response) {
   // Request and Response come from node's http module.
   //
@@ -27,10 +30,9 @@ var requestHandler = function(request, response) {
   // Adding more logging to your server can be an easy way to get passive
   // debugging help, but you should always be careful about leaving stray
   // console.logs in your code.
-  console.log("Serving request type " + request.method + " for url " + request.url);
-
   // The outgoing status.
   var statusCode = 200;
+  var postHeader = 201;
 
   // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
@@ -39,11 +41,12 @@ var requestHandler = function(request, response) {
   //
   // You will need to change this if you are sending something
   // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = "text/plain";
+  // headers['Content-Type'] = "text/plain";
 
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
-  response.writeHead(statusCode, headers);
+  // response.writeHead(statusCode, headers);
+  // response.write(typeof data);
 
   // Make sure to always call response.end() - Node may not send
   // anything back to the client until you do. The string you pass to
@@ -52,8 +55,92 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
-  response.end("Hello, World!");
+  // response.end("Hello, World!");
+
+
+  headers['Content-Type'] = "text/JSON";
+  console.log("Serving request type " + request.method + " for url " + request.url);
+  console.log(request);
+
+  var urlpackage = require('url');
+  var urlInfo = urlpackage.parse(request.url, true);
+
+  // if (!urlInfo.pathname) {
+  //   response.statusCode = 404;
+  // }
+
+  if (urlInfo.pathname === '/classes/room1' || urlInfo.pathname === '/classes/messages') {
+    
+    if (request.method === 'GET') {
+      try {
+        response.writeHead(statusCode, headers)
+        return response.end(JSON.stringify(messages));
+      } catch (er) {
+        response.statusCode = 404;
+        return response.end('error: ' + er.message);
+      }
+    } 
+
+    else if (request.method === 'POST') {
+      var body = '';
+      response.writeHead(postHeader, headers);
+
+      request.on('data', function(chunk) {
+        body += chunk;
+      });
+
+      request.on('end', function() {
+        try {
+          messages.results.push(JSON.parse(body));
+          return response.end(JSON.stringify(messages));
+        } 
+        catch (er) {
+          response.statusCode = 400;
+          return response.end('error: ' + er.message);
+        }
+      });
+
+    }
+  }
+
+  else {
+    response.statusCode = 404;
+    return response.end('Error!');
+  }
+
+//   if (urlInfo.pathname === '/classes/messages') {
+  
+//     if (request.method === 'GET') {
+
+//       response.writeHead(statusCode, headers)
+//       return response.end(JSON.stringify(messages));
+//     } 
+
+//     else if (request.method === 'POST') {
+//       var body = '';
+//       response.writeHead(postHeader, headers);
+
+//       request.on('data', function(chunk) {
+//         body += chunk;
+//       });
+
+//       request.on('end', function() {
+//         try {
+//           messages.results.push(JSON.parse(body));
+//           return response.end(JSON.stringify(messages));
+//         } 
+//         catch (er) {
+//           response.statusCode = 400;
+//           return response.end('error: ' + er.message);
+//         }
+//       });
+
+//     }
+//   }
+
 };
+
+
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
 // This code allows this server to talk to websites that
@@ -70,4 +157,6 @@ var defaultCorsHeaders = {
   "access-control-allow-headers": "content-type, accept",
   "access-control-max-age": 10 // Seconds.
 };
+
+exports.requestHandler = requestHandler;
 
