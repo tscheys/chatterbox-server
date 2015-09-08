@@ -71,17 +71,27 @@ var requestHandler = function(request, response) {
 
   if (urlInfo.pathname === '/classes/room1' || urlInfo.pathname === '/classes/messages') {
     
+    if (request.method === 'OPTIONS') {
+      headers['Content-Type'] = 'text/plain';
+      response.writeHead(statusCode, headers);
+      return response.end();
+    }
+    
     if (request.method === 'GET') {
+      
       try {
         response.writeHead(statusCode, headers)
         return response.end(JSON.stringify(messages));
-      } catch (er) {
+      } 
+
+      catch (er) {
         response.statusCode = 404;
         return response.end('error: ' + er.message);
       }
     } 
 
     else if (request.method === 'POST') {
+      
       var body = '';
       response.writeHead(postHeader, headers);
 
@@ -90,10 +100,12 @@ var requestHandler = function(request, response) {
       });
 
       request.on('end', function() {
+        
         try {
           messages.results.push(JSON.parse(body));
           return response.end(JSON.stringify(messages));
         } 
+
         catch (er) {
           response.statusCode = 400;
           return response.end('error: ' + er.message);
@@ -101,42 +113,14 @@ var requestHandler = function(request, response) {
       });
 
     }
-  }
+  } 
 
+  
   else {
     response.statusCode = 404;
     return response.end('Error!');
   }
 
-//   if (urlInfo.pathname === '/classes/messages') {
-  
-//     if (request.method === 'GET') {
-
-//       response.writeHead(statusCode, headers)
-//       return response.end(JSON.stringify(messages));
-//     } 
-
-//     else if (request.method === 'POST') {
-//       var body = '';
-//       response.writeHead(postHeader, headers);
-
-//       request.on('data', function(chunk) {
-//         body += chunk;
-//       });
-
-//       request.on('end', function() {
-//         try {
-//           messages.results.push(JSON.parse(body));
-//           return response.end(JSON.stringify(messages));
-//         } 
-//         catch (er) {
-//           response.statusCode = 400;
-//           return response.end('error: ' + er.message);
-//         }
-//       });
-
-//     }
-//   }
 
 };
 
@@ -153,7 +137,7 @@ var requestHandler = function(request, response) {
 // client from this domain by setting up static file serving.
 var defaultCorsHeaders = {
   "access-control-allow-origin": "*",
-  "access-control-allow-methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "access-control-allow-methods": "OPTIONS, GET, POST, PUT, DELETE",
   "access-control-allow-headers": "content-type, accept",
   "access-control-max-age": 10 // Seconds.
 };
