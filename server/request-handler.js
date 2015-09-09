@@ -12,65 +12,37 @@ this file and include it in basic-server.js so that it actually works.
 
 **************************************************************/
 
+// define object that will store message data
 var messages = {};
 messages.results = [];
 
-var requestHandler = function(request, response) {
-  // Request and Response come from node's http module.
-  //
-  // They include information about both the incoming request, such as
-  // headers and URL, and about the outgoing response, such as its status
-  // and content.
-  //
-  // Documentation for both request and response can be found in the HTTP section at
-  // http://nodejs.org/documentation/api/
+// import npm modules
+var fs = require('fs');
+var path = require('path');
+var mime = require('mime');
+var urlpackage = require('url');
 
-  // Do some basic logging.
-  //
-  // Adding more logging to your server can be an easy way to get passive
-  // debugging help, but you should always be careful about leaving stray
-  // console.logs in your code.
-  // The outgoing status.
+var requestHandler = function(request, response) {
+
+// state content types
   var statusCode = 200;
   var postHeader = 201;
 
-  // See the note below about CORS headers.
+// See the note below about CORS headers.
   var headers = defaultCorsHeaders;
 
-  // Tell the client we are sending them plain text.
-  //
-  // You will need to change this if you are sending something
-  // other than plain text, like JSON or HTML.
-  // headers['Content-Type'] = "text/plain";
-
-  // .writeHead() writes to the request line and headers of the response,
-  // which includes the status and all headers.
-  // response.writeHead(statusCode, headers);
-  // response.write(typeof data);
-
-  // Make sure to always call response.end() - Node may not send
-  // anything back to the client until you do. The string you pass to
-  // response.end() will be the body of the response - i.e. what shows
-  // up in the browser.
-  //
-  // Calling .end "flushes" the response's internal buffer, forcing
-  // node to actually send all the data over to the client.
-  // response.end("Hello, World!");
-
-
-  headers['Content-Type'] = "text/JSON";
+// Log server requests
   console.log("Serving request type " + request.method + " for url " + request.url);
-  console.log(request);
 
-  var urlpackage = require('url');
+// extract url, host, port,.. from the request
   var urlInfo = urlpackage.parse(request.url, true);
 
-  // if (!urlInfo.pathname) {
-  //   response.statusCode = 404;
-  // }
-
+// this statement runs when message data is either wanted or sent
   if (urlInfo.pathname === '/classes/room1' || urlInfo.pathname === '/classes/messages') {
     
+    // adjust header to JSON content type
+    headers['Content-Type'] = "text/JSON";
+
     if (request.method === 'OPTIONS') {
       headers['Content-Type'] = 'text/plain';
       response.writeHead(statusCode, headers);
@@ -81,12 +53,12 @@ var requestHandler = function(request, response) {
       
       try {
         response.writeHead(statusCode, headers)
-        return response.end(JSON.stringify(messages));
+        response.end(JSON.stringify(messages));
       } 
 
       catch (er) {
         response.statusCode = 404;
-        return response.end('error: ' + er.message);
+        response.end('error: ' + er.message);
       }
     } 
 
@@ -103,22 +75,43 @@ var requestHandler = function(request, response) {
         
         try {
           messages.results.push(JSON.parse(body));
-          return response.end(JSON.stringify(messages));
+          // write messages object to file
+          fs.writeFileSync(__dirname + '/backup.txt', JSON.stringify(messages), 'utf8');
+          response.end(JSON.stringify(messages));
         } 
 
         catch (er) {
           response.statusCode = 400;
-          return response.end('error: ' + er.message);
+          response.end('error: ' + er.message);
         }
       });
 
     }
   } 
-
   
+  
+  else if(urlInfo.pathname === '/') {
+    headers['Content-Type'] = 'text/html';
+    response.writeHead(statusCode, headers);
+    console.log(__dirname + '/client/refactor.html');
+    fs.createReadStream(__dirname + '/client/refactor.html').pipe(response);
+  
+  } 
   else {
-    response.statusCode = 404;
-    return response.end('Error!');
+    // debugger;
+    var content = mime.lookup('./client/' + urlInfo.pathname)
+    headers['Content-Type'] = content;
+    response.writeHead(statusCode, headers);
+    console.log(__dirname + '/client' + urlInfo.pathname);
+    // fs.createReadStream( __dirname + '/client' + urlInfo.pathname).pipe(response);
+    fs.readFile(__dirname + '/client' + urlInfo.pathname, function(error, data) {
+      if (error) {
+        console.log('error');
+      } else {
+        response.end(data);
+      }
+    })
+        
   }
 
 
