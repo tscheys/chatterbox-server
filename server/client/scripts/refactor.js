@@ -130,6 +130,7 @@ var id = 0;
 app = {
     // parse.com/1/classes/chatterbox/
     server: 'http://127.0.0.1:3000/classes/messages',
+    objectId: 0,
 
     init: function() {
       // Get username
@@ -147,13 +148,14 @@ app = {
       $('#send').on('submit', app.handleSubmit);
     },
 
+
     handleSubmit: function(e) {
       e.preventDefault();
 
       var message = {
         username: app.username,
         text: app.$text.val(),
-        objectId: id
+        objectId: app.objectId
       };
       id++;
       app.$text.val('');
@@ -192,6 +194,7 @@ app = {
         contentType: 'application/json',
         success: function(json) {
           // debugger;
+          app.objectId = JSON.parse(json).results.length
           app.displayMessages(JSON.parse(json).results);
         },
         complete: function() {
