@@ -21,6 +21,7 @@ var fs = require('fs');
 var path = require('path');
 var mime = require('mime');
 var urlpackage = require('url');
+var initial = false;
 
 var requestHandler = function(request, response) {
 
@@ -37,6 +38,18 @@ var requestHandler = function(request, response) {
 // extract url, host, port,.. from the request
   var urlInfo = urlpackage.parse(request.url, true);
 
+// initialization
+if(!initial) {
+  // debugger;
+  messages = fs.readFileSync(__dirname + '/backup.txt', 'utf8') || messages;
+  if (typeof messages === 'string') {
+    messages = JSON.parse(messages);
+  }
+  // debugger;
+  initial = true;
+}
+
+
 // this statement runs when message data is either wanted or sent
   if (urlInfo.pathname === '/classes/room1' || urlInfo.pathname === '/classes/messages') {
     
@@ -52,6 +65,7 @@ var requestHandler = function(request, response) {
     if (request.method === 'GET') {
       
       try {
+        // debugger;
         response.writeHead(statusCode, headers)
         response.end(JSON.stringify(messages));
       } 
